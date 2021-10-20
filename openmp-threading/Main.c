@@ -4,6 +4,8 @@
 #include<mpi.h>
 #endif
 
+#include <adiak.h>
+
 int main( int argc, char* argv[] )
 {
 	// =====================================================================
@@ -15,10 +17,13 @@ int main( int argc, char* argv[] )
 	int nprocs = 1;
 	unsigned long long verification;
 
+	void *adiak_comm_p = NULL;
+
 	#ifdef MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 	MPI_Comm_rank(MPI_COMM_WORLD, &mype);
+	adiak_comm_p = &MPI_COMM_NULL;
 	#endif
 
 	#ifdef AML
@@ -32,6 +37,12 @@ int main( int argc, char* argv[] )
 	#ifdef OPENMP
 	omp_set_num_threads(in.nthreads); 
 	#endif
+
+	adiak_init( adiak_comm_p );
+
+	CALI_MARK_FUNCTION_BEGIN;
+
+	record_globals( in, version );
 
 	// Print-out of Input Summary
 	if( mype == 0 )
@@ -74,6 +85,7 @@ int main( int argc, char* argv[] )
 	}
 
 	// Start Simulation Timer
+	CALI_MARK_BEGIN("simulation");
 	omp_start = get_time();
 
 	// Run simulation
@@ -86,6 +98,7 @@ int main( int argc, char* argv[] )
 		else
 		{
 			printf("Error: No kernel ID %d found!\n", in.kernel_id);
+			CALI_MARK_FUNCTION_END;
 			exit(1);
 		}
 	}
@@ -100,6 +113,7 @@ int main( int argc, char* argv[] )
 
 	// End Simulation Timer
 	omp_end = get_time();
+	CALI_MARK_END("simulation");
 
 	// =====================================================================
 	// Output Results & Finalize
@@ -110,6 +124,9 @@ int main( int argc, char* argv[] )
 
 	// Print / Save Results and Exit
 	int is_invalid_result = print_results( in, mype, omp_end-omp_start, nprocs, verification );
+
+	CALI_MARK_FUNCTION_END;
+	adiak_fini();
 
 	#ifdef MPI
 	MPI_Finalize();

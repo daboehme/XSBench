@@ -16,6 +16,8 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 {
 	if( mype == 0)	
 		printf("Beginning event based simulation...\n");
+
+	CALI_MARK_FUNCTION_BEGIN;
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// SUMMARY: Simulation Data Structure Manifest for "SD" Object
@@ -109,6 +111,8 @@ unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int 
 		verification += max_idx+1;
 	}
 
+	CALI_MARK_FUNCTION_END;
+
 	return verification;
 }
 
@@ -117,7 +121,8 @@ unsigned long long run_history_based_simulation(Inputs in, SimulationData SD, in
 	if( mype == 0)	
 		printf("Beginning history based simulation...\n");
 
-	
+	CALI_MARK_FUNCTION_BEGIN;
+
 	////////////////////////////////////////////////////////////////////////////////
 	// SUMMARY: Simulation Data Structure Manifest for "SD" Object
 	// Here we list all heap arrays (and lengths) in SD that would need to be
@@ -232,6 +237,9 @@ unsigned long long run_history_based_simulation(Inputs in, SimulationData SD, in
 		}
 
 	}
+
+	CALI_MARK_FUNCTION_END;
+
 	return verification;
 }
 
@@ -699,6 +707,8 @@ unsigned long long run_event_based_simulation_optimization_1(Inputs in, Simulati
 	
 	if( mype == 0)	printf("Simulation Kernel:\"%s\"\n", optimization_name);
 	
+	CALI_MARK_FUNCTION_BEGIN;
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Allocate Additional Data Structures Needed by Optimized Kernel
 	////////////////////////////////////////////////////////////////////////////////
@@ -861,6 +871,7 @@ unsigned long long run_event_based_simulation_optimization_1(Inputs in, Simulati
 	
 	stop = get_time();
 	if(mype == 0) printf("XS Lookups took %.3lf seconds\n", stop-start);
+	CALI_MARK_FUNCTION_END;
 	return verification;
 }
 

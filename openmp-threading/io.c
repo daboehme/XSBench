@@ -4,6 +4,8 @@
 #include<mpi.h>
 #endif
 
+#include <adiak.h>
+
 // Prints program logo
 void logo(int version)
 {
@@ -115,6 +117,40 @@ int print_results( Inputs in, int mype, double runtime, int nprocs,
 	}
 
 	return is_invalid_result;
+}
+
+void record_globals(Inputs in, int version)
+{
+	adiak_cmdline();
+	adiak_executable();
+	adiak_clustername();
+	adiak_job_size();
+	adiak_launchdate();
+	adiak_user();
+
+	const char* method = in.simulation_method == EVENT_BASED ? "event" : "history";
+	adiak_namevalue("method",    adiak_general, NULL, "%s", method);
+	adiak_namevalue("size",      adiak_general, NULL, "%s", in.HM);
+	adiak_namevalue("materials", adiak_general, NULL, "%d", 12);
+	adiak_namevalue("nuclides",  adiak_general, NULL, "%d", in.n_isotopes);
+	adiak_namevalue("kernel",    adiak_general, NULL, "%d", in.kernel_id);
+	adiak_namevalue("threads",   adiak_general, NULL, "%d", in.nthreads);
+	adiak_namevalue("version",   adiak_general, NULL, "%d", version);
+
+	switch (in.grid_type) {
+		case HASH:
+			adiak_namevalue("grid",      adiak_general, NULL, "%s", "hash");
+			adiak_namevalue("hash_bins", adiak_general, NULL, "%d", in.hash_bins);
+			break;
+		case NUCLIDE:
+			adiak_namevalue("grid",      adiak_general, NULL, "%s", "nuclide");
+			break;
+		case UNIONIZED:
+			adiak_namevalue("grid",      adiak_general, NULL, "%s", "unionized");
+			break;
+		default:
+			break;
+	}
 }
 
 void print_inputs(Inputs in, int nprocs, int version )
@@ -455,6 +491,8 @@ Inputs read_CLI( int argc, char * argv[] )
 
 void binary_write( Inputs in, SimulationData SD )
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	char * fname = "XS_data.dat";
 	printf("Writing all data structures to binary file %s...\n", fname);
 	FILE * fp = fopen(fname, "w");
@@ -471,10 +509,14 @@ void binary_write( Inputs in, SimulationData SD )
 	fwrite(SD.unionized_energy_array, sizeof(double), SD.length_unionized_energy_array, fp);
 
 	fclose(fp);
+
+	CALI_MARK_FUNCTION_END;
 }
 
 SimulationData binary_read( Inputs in )
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	SimulationData SD;
 	
 	char * fname = "XS_data.dat";
@@ -503,6 +545,8 @@ SimulationData binary_read( Inputs in )
 	fread(SD.unionized_energy_array, sizeof(double), SD.length_unionized_energy_array, fp);
 
 	fclose(fp);
+
+	CALI_MARK_FUNCTION_END;
 
 	return SD;
 }

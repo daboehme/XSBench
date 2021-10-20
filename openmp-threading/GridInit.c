@@ -2,6 +2,8 @@
 
 SimulationData grid_init_do_not_profile( Inputs in, int mype )
 {
+	CALI_MARK_BEGIN("grid_init");
+
 	// Structure to hold all allocated simuluation data arrays
 	SimulationData SD;
 
@@ -223,5 +225,6 @@ SimulationData grid_init_do_not_profile( Inputs in, int mype )
 #endif
 	
 	if(mype == 0) printf("Intialization complete. Allocated %.0lf MB of data.\n", nbytes/1024.0/1024.0 );
+	CALI_MARK_END("grid_init");
 	return SD;
 }

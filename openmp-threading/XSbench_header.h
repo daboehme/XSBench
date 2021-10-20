@@ -12,6 +12,8 @@
 #include<assert.h>
 #include<stdint.h>
 
+#include <caliper/cali.h>
+
 #ifdef OPENMP
 #include<omp.h>
 #endif
@@ -107,6 +109,7 @@ void print_inputs(Inputs in, int nprocs, int version);
 int print_results( Inputs in, int mype, double runtime, int nprocs, unsigned long long vhash );
 void binary_write( Inputs in, SimulationData SD );
 SimulationData binary_read( Inputs in );
+void record_globals(Inputs in, int version);
 
 // Simulation.c
 unsigned long long run_event_based_simulation(Inputs in, SimulationData SD, int mype);
