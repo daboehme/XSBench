@@ -14,6 +14,8 @@
 
 unsigned long long run_event_based_simulation_baseline(Inputs in, SimulationData GSD, int mype)
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Configure & Launch Simulation Kernel
 	////////////////////////////////////////////////////////////////////////////////
@@ -22,18 +24,23 @@ unsigned long long run_event_based_simulation_baseline(Inputs in, SimulationData
 	int nthreads = 256;
 	int nblocks = ceil( (double) in.lookups / (double) nthreads);
 
+	CALI_MARK_BEGIN("lookup_kernel");
 	xs_lookup_kernel_baseline<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
-	
+	CALI_MARK_END("lookup_kernel");
 	////////////////////////////////////////////////////////////////////////////////
 	// Reduce Verification Results
 	////////////////////////////////////////////////////////////////////////////////
 	if( mype == 0)	printf("Reducing verification results...\n");
 
+	CALI_MARK_BEGIN("verification");
 	unsigned long verification_scalar = thrust::reduce(thrust::device, GSD.verification, GSD.verification + in.lookups, 0);
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("verification");
+
+	CALI_MARK_FUNCTION_END;
 
 	return verification_scalar;
 }
@@ -387,6 +394,8 @@ __device__ uint64_t fast_forward_LCG(uint64_t seed, uint64_t n)
 ////////////////////////////////////////////////////////////////////////////////////
 unsigned long long run_event_based_simulation_optimization_1(Inputs in, SimulationData GSD, int mype)
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	const char * optimization_name = "Optimization 1 - basic sample/lookup kernel splitting";
 	
 	if( mype == 0)	printf("Simulation Kernel:\"%s\"\n", optimization_name);
@@ -418,23 +427,30 @@ unsigned long long run_event_based_simulation_optimization_1(Inputs in, Simulati
 	int nthreads = 32;
 	int nblocks = ceil( (double) in.lookups / 32.0);
 	
+	CALI_MARK_BEGIN("sampling_kernel");
 	sampling_kernel<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("sampling_kernel");
 
+	CALI_MARK_BEGIN("lookup_kernel");
 	xs_lookup_kernel_optimization_1<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
-	
+	CALI_MARK_END("lookup_kernel");
+
 	////////////////////////////////////////////////////////////////////////////////
 	// Reduce Verification Results
 	////////////////////////////////////////////////////////////////////////////////
 	if( mype == 0)	printf("Reducing verification results...\n");
 
+	CALI_MARK_BEGIN("verification");
 	unsigned long verification_scalar = thrust::reduce(thrust::device, GSD.verification, GSD.verification + in.lookups, 0);
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("verification");
 
+	CALI_MARK_FUNCTION_END;
 	return verification_scalar;
 }
 
@@ -520,6 +536,8 @@ __global__ void xs_lookup_kernel_optimization_1(Inputs in, SimulationData GSD )
 ////////////////////////////////////////////////////////////////////////////////////
 unsigned long long run_event_based_simulation_optimization_2(Inputs in, SimulationData GSD, int mype)
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	const char * optimization_name = "Optimization 2 - Material Lookup Kernels";
 	
 	if( mype == 0)	printf("Simulation Kernel:\"%s\"\n", optimization_name);
@@ -551,25 +569,32 @@ unsigned long long run_event_based_simulation_optimization_2(Inputs in, Simulati
 	int nthreads = 32;
 	int nblocks = ceil( (double) in.lookups / 32.0);
 	
+	CALI_MARK_BEGIN("sampling_kernel");
 	sampling_kernel<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("sampling_kernel");
 
+	CALI_MARK_BEGIN("lookup_kernel");
 	// Launch all material kernels individually
 	for( int m = 0; m < 12; m++ )
 		xs_lookup_kernel_optimization_2<<<nblocks, nthreads>>>( in, GSD, m );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("lookup_kernel");
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// Reduce Verification Results
 	////////////////////////////////////////////////////////////////////////////////
 	if( mype == 0)	printf("Reducing verification results...\n");
 
+	CALI_MARK_BEGIN("verification");
 	unsigned long verification_scalar = thrust::reduce(thrust::device, GSD.verification, GSD.verification + in.lookups, 0);
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("verification");
 
+	CALI_MARK_FUNCTION_END;
 	return verification_scalar;
 }
 
@@ -636,6 +661,8 @@ __global__ void xs_lookup_kernel_optimization_2(Inputs in, SimulationData GSD, i
 ////////////////////////////////////////////////////////////////////////////////////
 unsigned long long run_event_based_simulation_optimization_3(Inputs in, SimulationData GSD, int mype)
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	const char * optimization_name = "Optimization 3 - Fuel or Other Lookup Kernels";
 	
 	if( mype == 0)	printf("Simulation Kernel:\"%s\"\n", optimization_name);
@@ -667,25 +694,32 @@ unsigned long long run_event_based_simulation_optimization_3(Inputs in, Simulati
 	int nthreads = 32;
 	int nblocks = ceil( (double) in.lookups / 32.0);
 	
+	CALI_MARK_BEGIN("sampling_kernel");
 	sampling_kernel<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("sampling_kernel");
 
+	CALI_MARK_BEGIN("lookup_kernel");
 	// Launch all material kernels individually
 	xs_lookup_kernel_optimization_3<<<nblocks, nthreads>>>( in, GSD, 0 );
 	xs_lookup_kernel_optimization_3<<<nblocks, nthreads>>>( in, GSD, 1 );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("lookup_kernel");
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// Reduce Verification Results
 	////////////////////////////////////////////////////////////////////////////////
 	if( mype == 0)	printf("Reducing verification results...\n");
 
+	CALI_MARK_BEGIN("verification");
 	unsigned long verification_scalar = thrust::reduce(thrust::device, GSD.verification, GSD.verification + in.lookups, 0);
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("verification");
 
+	CALI_MARK_FUNCTION_END;
 	return verification_scalar;
 }
 
@@ -753,6 +787,8 @@ __global__ void xs_lookup_kernel_optimization_3(Inputs in, SimulationData GSD, i
 ////////////////////////////////////////////////////////////////////////////////////
 unsigned long long run_event_based_simulation_optimization_4(Inputs in, SimulationData GSD, int mype)
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	const char * optimization_name = "Optimization 4 - All Material Lookup Kernels + Material Sort";
 	
 	if( mype == 0)	printf("Simulation Kernel:\"%s\"\n", optimization_name);
@@ -784,18 +820,25 @@ unsigned long long run_event_based_simulation_optimization_4(Inputs in, Simulati
 	int nthreads = 32;
 	int nblocks = ceil( (double) in.lookups / 32.0);
 	
+	CALI_MARK_BEGIN("sampling_kernel");
 	sampling_kernel<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("sampling_kernel");
 
+	CALI_MARK_BEGIN("count");
 	// Count the number of fuel material lookups that need to be performed (fuel id = 0)
 	int n_lookups_per_material[12];
 	for( int m = 0; m < 12; m++ )
 		n_lookups_per_material[m] = thrust::count(thrust::device, GSD.mat_samples, GSD.mat_samples + in.lookups, m);
+	CALI_MARK_END("count");
 
+	CALI_MARK_BEGIN("sort");
 	// Sort materials
 	thrust::sort_by_key(thrust::device, GSD.mat_samples, GSD.mat_samples + in.lookups, GSD.p_energy_samples);
-	
+	CALI_MARK_END("sort");
+
+	CALI_MARK_BEGIN("lookup_kernel");
 	// Launch all material kernels individually
 	int offset = 0;
 	for( int m = 0; m < 12; m++ )
@@ -807,16 +850,20 @@ unsigned long long run_event_based_simulation_optimization_4(Inputs in, Simulati
 	}
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("lookup_kernel");
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// Reduce Verification Results
 	////////////////////////////////////////////////////////////////////////////////
 	if( mype == 0)	printf("Reducing verification results...\n");
 
+	CALI_MARK_BEGIN("verification");
 	unsigned long verification_scalar = thrust::reduce(thrust::device, GSD.verification, GSD.verification + in.lookups, 0);
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("verification");
 
+	CALI_MARK_FUNCTION_END;
 	return verification_scalar;
 }
 
@@ -894,6 +941,8 @@ struct is_mat_fuel{
 
 unsigned long long run_event_based_simulation_optimization_5(Inputs in, SimulationData GSD, int mype)
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	const char * optimization_name = "Optimization 5 - Fuel/No Fuel Lookup Kernels + Fuel/No Fuel Sort";
 	
 	if( mype == 0)	printf("Simulation Kernel:\"%s\"\n", optimization_name);
@@ -925,16 +974,23 @@ unsigned long long run_event_based_simulation_optimization_5(Inputs in, Simulati
 	int nthreads = 32;
 	int nblocks = ceil( (double) in.lookups / 32.0);
 	
+	CALI_MARK_BEGIN("sampling_kernel");
 	sampling_kernel<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("sampling_kernel");
 
+	CALI_MARK_BEGIN("count");
 	// Count the number of fuel material lookups that need to be performed (fuel id = 0)
 	int n_fuel_lookups = thrust::count(thrust::device, GSD.mat_samples, GSD.mat_samples + in.lookups, 0);
+	CALI_MARK_END("count");
 
+	CALI_MARK_BEGIN("partition");
 	// Partition fuel into the first part of the array
 	thrust::partition(thrust::device, GSD.mat_samples, GSD.mat_samples + in.lookups, GSD.p_energy_samples, is_mat_fuel());
+	CALI_MARK_END("partition");
 
+	CALI_MARK_BEGIN("lookup_kernel");
 	// Launch all material kernels individually (asynchronous is allowed)
 	nblocks = ceil( (double) n_fuel_lookups / (double) nthreads);
 	xs_lookup_kernel_optimization_5<<<nblocks, nthreads>>>( in, GSD, n_fuel_lookups, 0 );
@@ -944,15 +1000,20 @@ unsigned long long run_event_based_simulation_optimization_5(Inputs in, Simulati
 
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("lookup_kernel");
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// Reduce Verification Results
 	////////////////////////////////////////////////////////////////////////////////
 	if( mype == 0)	printf("Reducing verification results...\n");
 
+	CALI_MARK_BEGIN("verification");
 	unsigned long verification_scalar = thrust::reduce(thrust::device, GSD.verification, GSD.verification + in.lookups, 0);
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("verification");
+
+	CALI_MARK_FUNCTION_END;
 
 	return verification_scalar;
 }
@@ -1023,6 +1084,8 @@ __global__ void xs_lookup_kernel_optimization_5(Inputs in, SimulationData GSD, i
 ////////////////////////////////////////////////////////////////////////////////////
 unsigned long long run_event_based_simulation_optimization_6(Inputs in, SimulationData GSD, int mype)
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	const char * optimization_name = "Optimization 6 - Material & Energy Sorts + Material-specific Kernels";
 	
 	if( mype == 0)	printf("Simulation Kernel:\"%s\"\n", optimization_name);
@@ -1054,15 +1117,20 @@ unsigned long long run_event_based_simulation_optimization_6(Inputs in, Simulati
 	int nthreads = 32;
 	int nblocks = ceil( (double) in.lookups / 32.0);
 	
+	CALI_MARK_BEGIN("sampling_kernel");
 	sampling_kernel<<<nblocks, nthreads>>>( in, GSD );
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("sampling_kernel");
 
+	CALI_MARK_BEGIN("count");
 	// Count the number of fuel material lookups that need to be performed (fuel id = 0)
 	int n_lookups_per_material[12];
 	for( int m = 0; m < 12; m++ )
 		n_lookups_per_material[m] = thrust::count(thrust::device, GSD.mat_samples, GSD.mat_samples + in.lookups, m);
+	CALI_MARK_END("count");
 
+	CALI_MARK_BEGIN("sort");
 	// Sort by material first
 	thrust::sort_by_key(thrust::device, GSD.mat_samples, GSD.mat_samples + in.lookups, GSD.p_energy_samples);
 
@@ -1073,7 +1141,9 @@ unsigned long long run_event_based_simulation_optimization_6(Inputs in, Simulati
 		thrust::sort_by_key(thrust::device, GSD.p_energy_samples + offset, GSD.p_energy_samples + offset + n_lookups_per_material[m], GSD.mat_samples + offset);
 		offset += n_lookups_per_material[m];
 	}
+	CALI_MARK_END("sort");
 	
+	CALI_MARK_BEGIN("lookup_kernel");
 	// Launch all material kernels individually
 	offset = 0;
 	for( int m = 0; m < 12; m++ )
@@ -1085,15 +1155,20 @@ unsigned long long run_event_based_simulation_optimization_6(Inputs in, Simulati
 	}
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("lookup_kernel");
 	
 	////////////////////////////////////////////////////////////////////////////////
 	// Reduce Verification Results
 	////////////////////////////////////////////////////////////////////////////////
 	if( mype == 0)	printf("Reducing verification results...\n");
 
+	CALI_MARK_BEGIN("verification");
 	unsigned long verification_scalar = thrust::reduce(thrust::device, GSD.verification, GSD.verification + in.lookups, 0);
 	gpuErrchk( cudaPeekAtLastError() );
 	gpuErrchk( cudaDeviceSynchronize() );
+	CALI_MARK_END("verification");
+
+	CALI_MARK_FUNCTION_END;
 
 	return verification_scalar;
 }

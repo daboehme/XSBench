@@ -3,6 +3,8 @@
 // Moves all required data structures to the GPU's memory space
 SimulationData move_simulation_data_to_device( Inputs in, int mype, SimulationData SD )
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	if(mype == 0) printf("Allocating and moving simulation data to GPU memory space...\n");
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -73,12 +75,16 @@ SimulationData move_simulation_data_to_device( Inputs in, int mype, SimulationDa
 	
 	if(mype == 0 ) printf("GPU Intialization complete. Allocated %.0lf MB of data on GPU.\n", total_sz/1024.0/1024.0 );
 
+	CALI_MARK_FUNCTION_END;
+
 	return GSD;
 
 }
 
 SimulationData grid_init_do_not_profile( Inputs in, int mype )
 {
+	CALI_MARK_FUNCTION_BEGIN;
+
 	// Structure to hold all allocated simuluation data arrays
 	SimulationData SD;
 
@@ -247,6 +253,8 @@ SimulationData grid_init_do_not_profile( Inputs in, int mype )
 	SD.length_concs = SD.length_mats;
 
 	if(mype == 0) printf("Intialization complete. Allocated %.0lf MB of data on CPU.\n", nbytes/1024.0/1024.0 );
+
+	CALI_MARK_FUNCTION_END;
 
 	return SD;
 }

@@ -14,9 +14,13 @@ int main( int argc, char* argv[] )
 	// Process CLI Fields -- store in "Inputs" structure
 	Inputs in = read_CLI( argc, argv );
 
+	CALI_MARK_FUNCTION_BEGIN;
+
 	// Print-out of Input Summary
 	if( mype == 0 )
 		print_inputs( in, nprocs, version );
+	
+	record_globals( in, version );
 
 	// =====================================================================
 	// Prepare Nuclide Energy Grids, Unionized Energy Grid, & Material Data
@@ -56,6 +60,7 @@ int main( int argc, char* argv[] )
 	}
 
 	// Start Simulation Timer
+	CALI_MARK_BEGIN("simulation");
 	omp_start = get_time();
 
 	// Run simulation
@@ -86,7 +91,6 @@ int main( int argc, char* argv[] )
 		printf("History-based simulation not implemented in CUDA code. Instead,\nuse the event-based method with \"-m event\" argument.\n");
 		exit(1);
 	}
-
 	if( mype == 0)	
 	{	
 		printf("\n" );
@@ -95,12 +99,15 @@ int main( int argc, char* argv[] )
 
 	// End Simulation Timer
 	omp_end = get_time();
+	CALI_MARK_END("simulation");
 
 	// Final Hash Step
 	verification = verification % 999983;
 
 	// Print / Save Results and Exit
 	int is_invalid_result = print_results( in, mype, omp_end-omp_start, nprocs, verification );
+
+	CALI_MARK_FUNCTION_END;
 
 	return is_invalid_result;
 }
