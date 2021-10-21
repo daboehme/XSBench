@@ -298,6 +298,9 @@ Inputs read_CLI( int argc, char * argv[] )
 	// defaults to baseline kernel
 	input.kernel_id = 0;
 	
+	// disable caliper profiling
+	input.cali_config = NULL;
+
 	// defaults to H-M Large benchmark
 	input.HM = (char *) malloc( 6 * sizeof(char) );
 	input.HM[0] = 'l' ; 
@@ -440,6 +443,14 @@ Inputs read_CLI( int argc, char * argv[] )
 			{
 				input.kernel_id = atoi(argv[i]);
 			}
+			else
+				print_CLI_error();
+		}
+		// Caliper profiling config (-P)
+		else if( strcmp(arg, "-P") == 0 )
+		{
+			if( ++i < argc )
+				input.cali_config = argv[i];
 			else
 				print_CLI_error();
 		}

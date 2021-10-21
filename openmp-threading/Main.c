@@ -5,6 +5,7 @@
 #endif
 
 #include <adiak.h>
+#include <caliper/cali-manager.h>
 
 int main( int argc, char* argv[] )
 {
@@ -39,6 +40,20 @@ int main( int argc, char* argv[] )
 	#endif
 
 	adiak_init( adiak_comm_p );
+
+	cali_ConfigManager mgr;
+    cali_ConfigManager_new(&mgr);
+
+	if (in.cali_config)
+		cali_ConfigManager_add(&mgr, in.cali_config);
+    if (cali_ConfigManager_error(&mgr)) {
+        cali_SHROUD_array errmsg;
+        cali_ConfigManager_error_msg_bufferify(&mgr, &errmsg);
+        fprintf(stderr, "Caliper config error: %s\n", errmsg.addr.ccharp);
+        cali_SHROUD_memory_destructor(&errmsg.cxx);
+    }
+
+    cali_ConfigManager_start(&mgr);
 
 	CALI_MARK_FUNCTION_BEGIN;
 
@@ -126,6 +141,8 @@ int main( int argc, char* argv[] )
 	int is_invalid_result = print_results( in, mype, omp_end-omp_start, nprocs, verification );
 
 	CALI_MARK_FUNCTION_END;
+
+	cali_ConfigManager_flush(&mgr);
 	adiak_fini();
 
 	#ifdef MPI
