@@ -430,6 +430,14 @@ Inputs read_CLI( int argc, char * argv[] )
 			else
 				print_CLI_error();
 		}
+		// Caliper profiling config (-P)
+		else if( strcmp(arg, "-P") == 0 )
+		{
+			if( ++i < argc )
+				input.cali_config = argv[i];
+			else
+				print_CLI_error();
+		}
 		else
 			print_CLI_error();
 	}
