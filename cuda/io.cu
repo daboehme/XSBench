@@ -264,7 +264,7 @@ Inputs read_CLI( int argc, char * argv[] )
 	Inputs input;
 
 	// defaults to the event based simulation method
-	input.simulation_method = EVENT_BASED;
+	input.simulation_method = HISTORY_BASED;
 	
 	// defaults to max threads on the system	
 	input.nthreads = 1;
@@ -302,6 +302,8 @@ Inputs read_CLI( int argc, char * argv[] )
 	input.HM[4] = 'e' ; 
 	input.HM[5] = '\0';
 	
+	input.cali_config = NULL;
+
 	// Check if user sets these
 	int user_g = 0;
 

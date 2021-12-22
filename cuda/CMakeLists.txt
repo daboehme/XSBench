@@ -8,13 +8,18 @@ set(XSBENCH_SOURCES
 
 enable_language(CUDA)
 
-set(CMAKE_CUDA_STANDARD 11)
+set(CMAKE_C_STANDARD    99)
+set(CMAKE_CXX_STANDARD  14)
+set(CMAKE_CUDA_STANDARD 14)
+
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_executable(XSBench ${XSBENCH_SOURCES})
 
 target_include_directories(XSBench PRIVATE ${caliper_INCLUDE_DIR} ${adiak_INCLUDE_DIRS})
 target_link_libraries(XSBench PRIVATE caliper ${adiak_LIBRARIES})
+
+set_property(TARGET XSBench PROPERTY CUDA_ARCHITECTURES "70;72")
 
 include(CheckLibraryExists)
 CHECK_LIBRARY_EXISTS(m ceil "" HAVE_LIBM)
