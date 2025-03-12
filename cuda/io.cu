@@ -4,12 +4,7 @@
 
 void record_globals(Inputs in, int version)
 {
-	adiak_cmdline();
-	adiak_executable();
-	adiak_clustername();
-	adiak_job_size();
-	adiak_launchdate();
-	adiak_user();
+	adiak_collect_all();
 
 	const char* method = in.simulation_method == EVENT_BASED ? "event" : "history";
 	adiak_namevalue("method",    adiak_general, NULL, "%s", method);

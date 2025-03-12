@@ -11,6 +11,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_executable(XSBench ${XSBENCH_SOURCES})
 
+set_target_properties(XSBench PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(XSBench PRIVATE ${caliper_INCLUDE_DIR} ${adiak_INCLUDE_DIRS})
 target_link_libraries(XSBench PRIVATE caliper ${adiak_LIBRARIES})
 

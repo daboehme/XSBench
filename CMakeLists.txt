@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(XSBench LANGUAGES C)
+project(XSBench LANGUAGES C CXX)
 
 find_package(caliper REQUIRED)
 find_package(adiak REQUIRED)
