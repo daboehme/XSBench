@@ -117,6 +117,9 @@ int main( int argc, char* argv[] )
 	omp_end = get_time();
 	CALI_MARK_END("simulation");
 
+	// Release device memory
+	release_device_memory(GSD);
+
 	// Final Hash Step
 	verification = verification % 999983;
 

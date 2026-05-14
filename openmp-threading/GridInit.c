@@ -13,6 +13,9 @@ SimulationData grid_init_do_not_profile( Inputs in, int mype )
 	// Set the initial seed value
 	uint64_t seed = 42;	
 
+	// loop variable 
+	long e = 0;
+	
 	////////////////////////////////////////////////////////////////////
 	// Initialize Nuclide Grids
 	////////////////////////////////////////////////////////////////////
@@ -137,7 +140,7 @@ SimulationData grid_init_do_not_profile( Inputs in, int mype )
 
 		// For each energy level in the hash table
 		#pragma omp parallel for
-		for( long e = 0; e < in.hash_bins; e++ )
+		for( e = 0; e < in.hash_bins; e++ )
 		{
 			double energy = e * du;
 

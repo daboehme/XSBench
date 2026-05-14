@@ -5,14 +5,19 @@
 #include<stdlib.h>
 #include<time.h>
 #include<string.h>
-#include<strings.h>
 #include<math.h>
-#include<unistd.h>
-#include<sys/time.h>
 #include<assert.h>
 #include<stdint.h>
 
 #include <caliper/cali.h>
+
+#ifdef _MSC_VER
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#else
+#include<unistd.h>
+#include<sys/time.h>
+#endif
 
 #ifdef OPENMP
 #include<omp.h>
