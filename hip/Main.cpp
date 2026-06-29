@@ -1,5 +1,7 @@
 #include "XSbench_header.h"
 
+#include <iostream>
+
 int main( int argc, char* argv[] )
 {
 	// =====================================================================
@@ -14,9 +16,19 @@ int main( int argc, char* argv[] )
 	// Process CLI Fields -- store in "Inputs" structure
 	Inputs in = read_CLI( argc, argv );
 
+	cali::ConfigManager mgr;
+	mgr.add(in.cali_config);
+	if (mgr.error())
+		std::cerr << "Caliper config error: " << mgr.error_msg() << std::endl;
+	mgr.start();
+
+	CALI_MARK_FUNCTION_BEGIN;
+
 	// Print-out of Input Summary
 	if( mype == 0 )
 		print_inputs( in, nprocs, version );
+
+	record_globals( in, version );
 
 	// =====================================================================
 	// Prepare Nuclide Energy Grids, Unionized Energy Grid, & Material Data
@@ -56,6 +68,7 @@ int main( int argc, char* argv[] )
 	}
 
 	// Start Simulation Timer
+	CALI_MARK_BEGIN("simulation");
 	omp_start = get_time();
 
 	// Run simulation
@@ -97,12 +110,16 @@ int main( int argc, char* argv[] )
 
 	// End Simulation Timer
 	omp_end = get_time();
+	CALI_MARK_END("simulation");
 
 	// Final Hash Step
 	verification = verification % 999983;
 
 	// Print / Save Results and Exit
 	int is_invalid_result = print_results( in, mype, omp_end-omp_start, nprocs, verification );
+
+	CALI_MARK_FUNCTION_END;
+	mgr.flush();
 
 	return is_invalid_result;
 }

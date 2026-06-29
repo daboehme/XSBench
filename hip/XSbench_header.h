@@ -10,6 +10,10 @@
 #include<stdint.h>
 #include <chrono> 
 
+#include <caliper/cali.h>
+#include <caliper/cali-manager.h>
+#include <adiak.hpp>
+
 // Grid types
 #define UNIONIZED 0
 #define NUCLIDE 1
@@ -59,6 +63,7 @@ typedef struct{
 	int simulation_method;
 	int binary_mode;
 	int kernel_id;
+	char * cali_config;
 } Inputs;
 
 typedef struct{
@@ -94,6 +99,7 @@ void print_inputs(Inputs in, int nprocs, int version);
 int print_results( Inputs in, int mype, double runtime, int nprocs, unsigned long long vhash );
 void binary_write( Inputs in, SimulationData SD );
 SimulationData binary_read( Inputs in );
+void record_globals(Inputs in, int version);
 
 // Simulation.cu
 unsigned long long run_event_based_simulation_baseline(Inputs in, SimulationData SD, int mype);

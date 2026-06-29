@@ -1,5 +1,33 @@
 #include "XSbench_header.h"
 
+void record_globals(Inputs in, int version)
+{
+	adiak::collect_all();
+
+	adiak::value("method", in.simulation_method == EVENT_BASED ? "event" : "history");
+	adiak::value("size", in.HM);
+	adiak::value("materials", 12);
+	adiak::value("nuclides", in.n_isotopes);
+	adiak::value("kernel", in.kernel_id);
+	adiak::value("threads", in.nthreads);
+	adiak::value("version", version);
+
+	switch (in.grid_type) {
+		case HASH:
+			adiak::value("grid", "hash");
+			adiak::value("hash_bins", in.hash_bins);
+			break;
+		case NUCLIDE:
+			adiak::value("grid", "nuclide");
+			break;
+		case UNIONIZED:
+			adiak::value("grid", "unionized");
+			break;
+		default:
+			break;
+	}
+}
+
 // Prints program logo
 void logo(int version)
 {
@@ -171,6 +199,7 @@ void print_inputs(Inputs in, int nprocs, int version )
 		printf("Read\n");
 	else
 		printf("Write\n");
+	printf("Caliper configuration:        %s\n", in.cali_config);
 	border_print();
 	center_print("INITIALIZATION - DO NOT PROFILE", 79);
 	border_print();
@@ -218,6 +247,7 @@ void print_CLI_error(void)
 	printf("  -h <hash bins>           Number of hash bins (only relevant when used with \"-G hash\")\n");
 	printf("  -b <binary mode>         Read or write all data structures to file. If reading, this will skip initialization phase. (read, write)\n");
 	printf("  -k <kernel ID>           Specifies which kernel to run. 0 is baseline, 1, 2, etc are optimized variants. (0 is default.)\n");
+	printf("  -P <caliper config>      Caliper profiling config. Empty by default.\n");
 	printf("Default is equivalent to: -m history -s large -l 34 -p 500000 -G unionized -k 0\n");
 	printf("See readme for full description of default run values\n");
 	exit(4);
@@ -265,6 +295,8 @@ Inputs read_CLI( int argc, char * argv[] )
 	input.HM[3] = 'g' ; 
 	input.HM[4] = 'e' ; 
 	input.HM[5] = '\0';
+
+	input.cali_config = NULL;
 	
 	// Check if user sets these
 	int user_g = 0;
@@ -391,6 +423,14 @@ Inputs read_CLI( int argc, char * argv[] )
 			{
 				input.kernel_id = atoi(argv[i]);
 			}
+			else
+				print_CLI_error();
+		}
+		// Caliper profiling config (-P)
+		else if( strcmp(arg, "-P") == 0 )
+		{
+			if( ++i < argc )
+				input.cali_config = argv[i];
 			else
 				print_CLI_error();
 		}

@@ -249,6 +249,7 @@ void print_CLI_error(void)
 	printf("  -h <hash bins>           Number of hash bins (only relevant when used with \"-G hash\")\n");
 	printf("  -b <binary mode>         Read or write all data structures to file. If reading, this will skip initialization phase. (read, write)\n");
 	printf("  -k <kernel ID>           Specifies which kernel to run. 0 is baseline, 1, 2, etc are optimized variants. (0 is default.)\n");
+	printf("  -P <caliper config>      Caliper profiling config. Empty by default.\n");
 	printf("Default is equivalent to: -m history -s large -l 34 -p 500000 -G unionized -k 0\n");
 	printf("See readme for full description of default run values\n");
 	exit(4);
