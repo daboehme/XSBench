@@ -6,6 +6,8 @@ COMPILER    = amd
 OPTIMIZE    = yes
 DEBUG       = no
 PROFILE     = no
+CALI_DIR    = /usr
+ADIAK_DIR   = /usr
 
 #===============================================================================
 # Program name & source code list
@@ -28,10 +30,10 @@ obj = $(source:.cpp=.o)
 #===============================================================================
 
 # Standard Flags
-CFLAGS += -std=c++14
+CFLAGS += -std=c++14 -I$(CALI_DIR)/include -I$(ADIAK_DIR)/include
 
 # Linker Flags
-LDFLAGS = -lm
+LDFLAGS = -lm -L$(CALI_DIR)/lib64 -L$(ADIAK_DIR)/lib -lcaliper -ladiak
 
 # AMD
 ifeq ($(COMPILER),amd)

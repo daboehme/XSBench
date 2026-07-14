@@ -12,6 +12,8 @@ DEBUG       = no
 PROFILE     = no
 MPI         = no
 AML         = no
+CALI_DIR    = /usr
+ADIAK_DIR   = /usr
 
 #===============================================================================
 # Program name & source code list
@@ -39,10 +41,10 @@ CC    = gcc
 endif
 
 # Standard Flags
-CFLAGS := -std=gnu99 -Wall
+CFLAGS := -std=gnu99 -Wall -I$(CALI_DIR)/include -I$(ADIAK_DIR)/include
 
 # Linker Flags
-LDFLAGS = -lm
+LDFLAGS = -lm -L$(CALI_DIR)/lib64 -L$(ADIAK_DIR)/lib -lcaliper -ladiak
 
 # Regular gcc Compiler
 ifneq (,$(findstring gcc,$(CC)))
