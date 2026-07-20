@@ -296,7 +296,7 @@ Inputs read_CLI( int argc, char * argv[] )
 	input.HM[4] = 'e' ; 
 	input.HM[5] = '\0';
 
-	input.cali_config = NULL;
+	input.cali_config = "";
 	
 	// Check if user sets these
 	int user_g = 0;
