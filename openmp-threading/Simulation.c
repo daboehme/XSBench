@@ -251,6 +251,7 @@ void calculate_micro_xs(   double p_energy, int nuc, long n_isotopes,
                            double * restrict egrid, int * restrict index_data,
                            NuclideGridPoint * restrict nuclide_grids,
                            long idx, double * restrict xs_vector, int grid_type, int hash_bins ){
+	CALI_MARK_FUNCTION_BEGIN;
 	// Variables
 	double f;
 	NuclideGridPoint * low, * high;
@@ -273,10 +274,12 @@ void calculate_micro_xs(   double p_energy, int nuc, long n_isotopes,
 	{
 		// pull ptr from energy grid and check to ensure that
 		// we're not reading off the end of the nuclide's grid
+		CALI_MARK_BEGIN("Expensive Grid Access");
 		if( index_data[idx * n_isotopes + nuc] == n_gridpoints - 1 )
 			low = &nuclide_grids[nuc*n_gridpoints + index_data[idx * n_isotopes + nuc] - 1];
 		else
 			low = &nuclide_grids[nuc*n_gridpoints + index_data[idx * n_isotopes + nuc]];
+		CALI_MARK_END("Expensive Grid Access");
 	}
 	else // Hash grid
 	{
@@ -328,6 +331,8 @@ void calculate_micro_xs(   double p_energy, int nuc, long n_isotopes,
 	
 	// Nu Fission XS
 	xs_vector[4] = high->nu_fission_xs - f * (high->nu_fission_xs - low->nu_fission_xs);
+
+	CALI_MARK_FUNCTION_END;
 }
 
 // Calculates macroscopic cross section based on a given material & energy 
@@ -341,18 +346,22 @@ void calculate_macro_xs( double p_energy, int mat, long n_isotopes,
 	int p_nuc; // the nuclide we are looking up
 	long idx = -1;	
 	double conc; // the concentration of the nuclide in the material
-
 	// cleans out macro_xs_vector
 	for( int k = 0; k < 5; k++ )
 		macro_xs_vector[k] = 0;
+
+	CALI_MARK_FUNCTION_BEGIN;
 
 	// If we are using the unionized energy grid (UEG), we only
 	// need to perform 1 binary search per macroscopic lookup.
 	// If we are using the nuclide grid search, it will have to be
 	// done inside of the "calculate_micro_xs" function for each different
 	// nuclide in the material.
-	if( grid_type == UNIONIZED )
+	if( grid_type == UNIONIZED ) {
+		CALI_MARK_BEGIN("Binary Search for Energy");
 		idx = grid_search( n_isotopes * n_gridpoints, p_energy, egrid);	
+		CALI_MARK_END("Binary Search for Energy");
+	}
 	else if( grid_type == HASH )
 	{
 		double du = 1.0 / hash_bins;
@@ -380,6 +389,7 @@ void calculate_macro_xs( double p_energy, int mat, long n_isotopes,
 		for( int k = 0; k < 5; k++ )
 			macro_xs_vector[k] += xs_vector[k] * conc;
 	}
+	CALI_MARK_FUNCTION_END;
 }
 
 

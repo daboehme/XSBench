@@ -58,6 +58,7 @@ __global__ void xs_lookup_kernel_baseline(Inputs in, SimulationData GSD )
 		return;
 
 	// Set the initial seed value
+	//CALI_MARK_BEGIN("GPU KERNEL");
 	uint64_t seed = STARTING_SEED;	
 
 	// Forward seed to lookup index (we need 2 samples per lookup)
@@ -104,6 +105,8 @@ __global__ void xs_lookup_kernel_baseline(Inputs in, SimulationData GSD )
 		}
 	}
 	GSD.verification[i] = max_idx+1;
+
+	//CALI_MARK_END("GPU KERNEL");
 }
 
 // Calculates the microscopic cross section for a given nuclide & energy
@@ -113,6 +116,9 @@ __device__ void calculate_micro_xs(   double p_energy, int nuc, long n_isotopes,
                            NuclideGridPoint * __restrict__ nuclide_grids,
                            long idx, double * __restrict__ xs_vector, int grid_type, int hash_bins ){
 	// Variables
+
+	//CALI_CXX_MARK_FUNCTION;
+	
 	double f;
 	NuclideGridPoint * low, * high;
 
@@ -199,6 +205,8 @@ __device__ void calculate_macro_xs( double p_energy, int mat, long n_isotopes,
                          NuclideGridPoint * __restrict__ nuclide_grids,
                          int * __restrict__ mats,
                          double * __restrict__ macro_xs_vector, int grid_type, int hash_bins, int max_num_nucs ){
+	//CALI_CXX_MARK_FUNCTION;
+
 	int p_nuc; // the nuclide we are looking up
 	long idx = -1;	
 	double conc; // the concentration of the nuclide in the material
@@ -248,6 +256,7 @@ __device__ void calculate_macro_xs( double p_energy, int mat, long n_isotopes,
 // returns lower index
 __device__ long grid_search( long n, double quarry, double * __restrict__ A)
 {
+	//CALI_CXX_MARK_FUNCTION;
 	long lowerLimit = 0;
 	long upperLimit = n-1;
 	long examinationPoint;

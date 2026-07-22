@@ -7,10 +7,10 @@ ifeq ($(CC),)
 CC    = gcc
 endif
 OPTIMIZE    = yes
-OPENMP      = yes
+OPENMP      = no
 DEBUG       = no
 PROFILE     = no
-MPI         = no
+USE_MPI         = no
 AML         = no
 CALI_DIR    = /usr
 ADIAK_DIR   = /usr
@@ -40,34 +40,42 @@ ifeq (cc,$(CC))
 CC    = gcc
 endif
 
+# Preserve compatibility with external tooling that still passes MPI=yes/no.
+ifeq ($(MPI),yes)
+USE_MPI = yes
+endif
+ifeq ($(MPI),no)
+USE_MPI = no
+endif
+
 # Standard Flags
 CFLAGS := -std=gnu99 -Wall -I$(CALI_DIR)/include -I$(ADIAK_DIR)/include
 
 # Linker Flags
-LDFLAGS = -lm -Wl,-rpath $(CALI_DIR)/lib64 -Wl,-rpath $(ADIAK_DIR)/lib -L$(CALI_DIR)/lib64 -L$(ADIAK_DIR)/lib -lcaliper -ladiak
+LDFLAGS = -lm -Wl,-rpath,$(CALI_DIR)/lib64 -Wl,-rpath,$(ADIAK_DIR)/lib -L$(CALI_DIR)/lib64 -L$(ADIAK_DIR)/lib -lcaliper -ladiak
 
 # Regular gcc Compiler
 ifneq (,$(findstring gcc,$(CC)))
   CFLAGS += -flto
-  ifeq ($(OPENMP),yes)
-	CFLAGS += -fopenmp -DOPENMP
-  endif
+#   ifeq ($(OPENMP),yes)
+# 	CFLAGS += -fopenmp -DOPENMP
+#   endif
 endif
 
 # LLVM Compiler
 ifneq (,$(findstring clang,$(CC)))
   CFLAGS += -flto
-  ifeq ($(OPENMP),yes)
-	CFLAGS += -fopenmp -DOPENMP
-  endif
+#   ifeq ($(OPENMP),yes)
+# 	CFLAGS += -fopenmp -DOPENMP
+#   endif
 endif
 
 # Intel Compiler
 ifneq (,$(findstring intel,$(CC)))
   CFLAGS += -ipo
-  ifeq ($(OPENMP),yes)
-	CFLAGS += -fopenmp -DOPENMP
-  endif
+#   ifeq ($(OPENMP),yes)
+# 	CFLAGS += -fopenmp -DOPENMP
+#   endif
 endif
 
 # Debug Flags
@@ -88,9 +96,9 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 # MPI
-ifeq ($(MPI),yes)
+ifeq ($(USE_MPI),yes)
   CC = mpicc
-  CFLAGS += -DMPI
+  CFLAGS += -DUSE_MPI
 endif
 
 # AML
