@@ -33,7 +33,7 @@ obj = $(source:.cpp=.o)
 CFLAGS += -std=c++14 -I$(CALI_DIR)/include -I$(ADIAK_DIR)/include
 
 # Linker Flags
-LDFLAGS = -lm -Wl,-rpath $(CALI_DIR)/lib64 -Wl,-rpath $(ADIAK_DIR)/lib -L$(CALI_DIR)/lib64 -L$(ADIAK_DIR)/lib -lcaliper -ladiak
+LDFLAGS = -lm -Wl,-rpath,$(CALI_DIR)/lib64 -Wl,-rpath,$(ADIAK_DIR)/lib -L$(CALI_DIR)/lib64 -L$(ADIAK_DIR)/lib -lcaliper -ladiak
 
 # AMD
 ifeq ($(COMPILER),amd)
