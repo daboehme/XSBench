@@ -6,7 +6,7 @@ CC          ?= llvm
 OPTIMIZE    ?= yes
 DEBUG       ?= no
 PROFILE     ?= no
-MPI         ?= no
+USE_MPI     ?= no
 
 #===============================================================================
 # Program name & source code list
@@ -30,6 +30,14 @@ obj = $(source:.cpp=.o)
 
 # Standard Flags
 CFLAGS := -std=c++17 -Wall
+
+# Preserve compatibility with external tooling that still passes MPI=yes/no.
+ifeq ($(MPI),yes)
+USE_MPI = yes
+endif
+ifeq ($(MPI),no)
+USE_MPI = no
+endif
 
 # Linker Flags
 LDFLAGS = -lm
@@ -77,9 +85,9 @@ ifeq ($(OPTIMIZE),yes)
 endif
 
 # MPI
-ifeq ($(MPI),yes)
+ifeq ($(USE_MPI),yes)
   CC = mpicc
-  CFLAGS += -DMPI
+  CFLAGS += -DUSE_MPI
 endif
 
 #===============================================================================

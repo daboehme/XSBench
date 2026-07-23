@@ -1,6 +1,6 @@
 #include "XSbench_header.h"
 
-#ifdef MPI
+#ifdef USE_MPI
 #include<mpi.h>
 #endif
 
@@ -49,7 +49,7 @@ int print_results( Inputs in, int mype, double runtime, int nprocs,
 	int sim_only_lookups_per_sec = (int) ((double) lookups/ (runtime-kernel_init_time));
 	
 	// If running in MPI, reduce timing statistics and calculate average
-	#ifdef MPI
+	#ifdef USE_MPI
 	int total_lookups = 0;
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Reduce(&lookups_per_sec, &total_lookups, 1, MPI_INT,
@@ -67,10 +67,10 @@ int print_results( Inputs in, int mype, double runtime, int nprocs,
 
 		// Print the results
     printf("NOTE: Timings are estimated -- use nvprof/nsys/iprof/rocprof for formal analysis\n");
-		#ifdef MPI
+		#ifdef USE_MPI
 		printf("MPI ranks:   %d\n", nprocs);
 		#endif
-		#ifdef MPI
+		#ifdef USE_MPI
 		printf("Total Lookups/s:            ");
 		fancy_int(total_lookups);
 		printf("Avg Lookups/s per MPI rank: ");
@@ -163,7 +163,7 @@ void print_inputs(Inputs in, int nprocs, int version )
 		printf("XS Lookups per Particle:      "); fancy_int(in.lookups);
 	}
 	printf("Total XS Lookups:             "); fancy_int(in.lookups);
-	#ifdef MPI
+	#ifdef USE_MPI
 	printf("MPI Ranks:                    %d\n", nprocs);
 	printf("Mem Usage per MPI Rank (MB):  "); fancy_int(mem_tot);
 	#else

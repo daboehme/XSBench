@@ -1,6 +1,6 @@
 #include "XSbench_header.h"
 
-#ifdef MPI
+#ifdef USE_MPI
 #include<mpi.h>
 #endif
 
@@ -19,12 +19,16 @@ int main( int argc, char* argv[] )
 	unsigned long long verification;
 
 	void *adiak_comm_p = NULL;
+	#ifdef USE_MPI
+	MPI_Comm adiak_comm;
+	#endif
 
-	#ifdef MPI
+	#ifdef USE_MPI
 	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &mype);
-	adiak_comm_p = &MPI_COMM_NULL;
+	adiak_comm = MPI_COMM_WORLD;
+	MPI_Comm_size(adiak_comm, &nprocs);
+	MPI_Comm_rank(adiak_comm, &mype);
+	adiak_comm_p = &adiak_comm;
 	#endif
 
 	#ifdef AML
@@ -145,7 +149,7 @@ int main( int argc, char* argv[] )
 	cali_ConfigManager_flush(&mgr);
 	adiak_fini();
 
-	#ifdef MPI
+	#ifdef USE_MPI
 	MPI_Finalize();
 	#endif
 

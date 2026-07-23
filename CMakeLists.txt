@@ -11,6 +11,10 @@ option(XSBENCH_CUDA "Build the CUDA version" OFF)
 option(XSBENCH_HIP  "Build the HIP version"  OFF)
 option(XSBENCH_MPI  "Build with MPI support" OFF)
 
+if (XSBENCH_MPI)
+  add_compile_definitions(USE_MPI)
+endif()
+
 if (XSBENCH_CUDA)
   if (XSBENCH_MPI)
     message(WARNING "CUDA version does not support MPI")
